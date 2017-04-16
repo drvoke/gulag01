@@ -8,7 +8,7 @@ class PerlinImage(object):
         self.width = size[0]
         self.height = size[1]
         self.scale = scale
-        self.image = Image.new("RGB", self.size)
+        self.image = Image.new("L", self.size)
         self.listRep = None
         self.keywords = kwargs
 
@@ -40,11 +40,11 @@ class PerlinImage(object):
         rep = self.listRep
         width = self.width
         height = self.height
-        imdraw = ImageDraw.Draw(self.image)
+        impix = self.image.load()
         for row in xrange(height):
             for col in xrange(width):
                 value = self.getValueFrom(rep, col, row)
-                imdraw.point((col,row), (value, value, value))
+                impix[col,row] = (value)
         return self.image
         
     def saveImage(self, filename, mode=None):
