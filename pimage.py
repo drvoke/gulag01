@@ -1,6 +1,7 @@
-import sys, os, random, noise
+import sys, os, random, noise, time
 from PIL import Image
 from PIL import ImageDraw
+
 
 class PerlinImage(object):
     def __init__(self, size, scale=1, **kwargs):
@@ -20,11 +21,12 @@ class PerlinImage(object):
         scale = self.scale
         width = self.width
         height = self.height
-        rep = genlist2d(width, height)
+        ratio = float(height) / width
+        rep = genlist2d(height, width)
         for row in xrange(height):
+            noisey = (float(row) / height) * (scale * ratio)
             for col in xrange(width):
                 noisex = (float(col) / width) * scale
-                noisey = (float(row) / height) * scale
                 rep[row][col] = self.toRGB(noise.snoise2(noisex, noisey, **keywords))
         return rep
     
@@ -43,7 +45,7 @@ class PerlinImage(object):
         impix = self.image.load()
         for row in xrange(height):
             for col in xrange(width):
-                value = self.getValueFrom(rep, col, row)
+                value = rep[row][col]
                 impix[col,row] = (value)
         return self.image
         
@@ -72,8 +74,7 @@ class PerlinImage(object):
             rowstr+='|'
             print(rowstr)
             print(topstr)
-
-
+            
 class Coords2d(object):
     def __init__(self, x=None, y=None):
         if x:
@@ -166,13 +167,23 @@ def genlist2d(rows, cols):
     list2d = [[0 for col in range(cols)] for row in range(rows)]
     return list2d
 
+def outputTester(reps):
+    for i in xrange(int(reps)):
+        start = time.clock()
+        pimg = PerlinImage((300,300), scale=1.0, octaves=4, persistence=0.6, lacunarity=2.0, base=random.random()*500.0)
+        end = time.clock()
+        print('300x300 PerlinImage object created in {} seconds.'.format(str(end - start)))
+        start = time.clock()
+        pimg.renderImage()
+        end = time.clock()
+        print('300x300 PerlinImage image rendered in {} seconds.'.format(str(end - start)))
+        start = time.clock()
+        pimg.saveImage('test{}.png'.format(str(i)))
+        end = time.clock()
+        print('300x300 PerlinImage image saved to disk in {} seconds.'.format(str(end - start)))
 
 if __name__ == '__main__':
-    for i in xrange(10):
-        pimg = PerlinImage((300,300), scale=1.0, octaves=4, persistence=0.6, lacunarity=2.0, base=random.random()*500.0)
-        pimg.renderImage()
-        pimg.saveImage('test{}.png'.format(str(i)))
-    
+    outputTester(10)
     
     
     
